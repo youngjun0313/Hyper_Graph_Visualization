@@ -15,15 +15,19 @@ import Paper from '@material-ui/core/Paper';
 import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import { mainListItems } from './listItems';
-import Orders from './Orders';
 import SQLinput from './SQLinput';
+import CytoscapeScreen from './GraphVisualization';
 
 const drawerWidth = 240;
+
 const viusualScreen = {
+    width: "100%",
     height: "73vh",
     paddingTop: 5,
-    backgroundColor: "#fff"
+    backgroundColor: "#fff",
+    textAlign: "left"
 };
+
 const inputScreen = {
     height: "5vh",
     paddingTop: 5,
@@ -109,7 +113,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Dashboard() {
+export default function MainScreen() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(true);
   const handleDrawerOpen = () => {
@@ -160,7 +164,7 @@ export default function Dashboard() {
                 <Grid item xs={12}>
                     <Paper className={classes.paper}>
                         <div style = {viusualScreen}>
-                            <Orders/>
+                            <CytoscapeScreen/>
                         </div>
                     </Paper>
                 </Grid>

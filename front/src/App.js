@@ -1,10 +1,10 @@
 import './App.css';
-import Dashboard from './components/Dashboard';
+import MainScreen from './components/MainScreen';
 
 function App() {
   return (
     <div className="App">
-      <Dashboard/>
+      <MainScreen/>
     </div>
   );
 }
