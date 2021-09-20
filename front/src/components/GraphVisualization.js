@@ -5,6 +5,7 @@ import COSEBilkent from "cytoscape-cose-bilkent";
 import nodeSVG from "../assets/node.svg";
 import { company, companyEdges, tradingPartners } from "./api";
 import { sampleData } from "./sampleData";
+import popper from 'cytoscape-popper';
 
 const styleSheet = [
   {
@@ -14,7 +15,7 @@ const styleSheet = [
       width: 60,
       label: "data(label)",
       "color": "white",
-      "background-color": "data(color)",
+      "background-color": "data(backgroundColor)",
       "text-halign": "center",
       "text-valign": "center",
       "font-size": 8,
@@ -23,15 +24,9 @@ const styleSheet = [
     }
   },
   {
-    selector: ".noun_vertex",
+    selector: ".simple_vertex",
     style: {
-      "background-color": "black"
-    }
-  },
-  {
-    selector: "node node",
-    style: {
-      "z-compound-depth": "top"
+      "background-color": "data(backgroundColor)",
     }
   },
   {
@@ -49,6 +44,7 @@ const styleSheet = [
 ];
 
 Cytoscape.use(COSEBilkent);
+Cytoscape.use(popper);
 
 export default function CytoscapeScreen() {
   const elements = [];
@@ -151,6 +147,58 @@ export default function CytoscapeScreen() {
       }}
       style={{ width: "100%", height: "100%" }}
       stylesheet={styleSheet}
+      maxZoom = {3}
+      minZoom = {0.3}
+      wheelSensitivity = {0.1}
+      cy={
+        (cy) => {
+          cy.elements().bind("mouseover", (event) => {
+            let tooltipId = `popper-target-${event.target.id()}`;
+            let existingTarget = document.getElementById(tooltipId);
+            if (existingTarget && existingTarget.length !== 0) {
+              existingTarget.remove();
+            }
+            event.target.popperRefObj = event.target.popper({
+            content: () => {
+              let tooltip = document.createElement("div");
+              tooltip.classList.add("popper-div");
+              let table = document.createElement('table');
+              tooltip.append(table);
+              let targetData = event.target.data();
+
+
+              for (let prop in targetData) {
+                if(prop == "backgroundColor")
+                  continue;
+
+                if (!targetData.hasOwnProperty(prop)) continue;
+      
+                let targetValue = targetData[prop];
+
+                if (typeof targetValue === "object") continue;
+      
+                let tr = table.insertRow();
+      
+                let tdTitle = tr.insertCell();
+                let tdValue = tr.insertCell();
+      
+                tdTitle.innerText = prop;
+                tdValue.innerText = targetValue;
+              }
+              document.body.appendChild(tooltip);
+              return tooltip;
+            },
+          })
+          cy.elements().unbind("mouseout");
+          cy.elements().bind("mouseout", (event) => {
+            if (event.target.popper) {
+              event.target.popperRefObj.state.elements.popper.remove();
+              event.target.popperRefObj.destroy();
+            }
+          });
+          
+        })
+      }}
     />
   );
 }

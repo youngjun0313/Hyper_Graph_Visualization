@@ -1,10 +1,13 @@
+const simpleVertexColor = "black";
+const pseudoVertexColor = "red";
+
 export const sampleData = [
     {
         data: {
             id: "node1",
             label: "국정조사",
-            color: "#abc"
+            backgroundColor: simpleVertexColor
         },
-        classes: ["noun_vertex"]
+        classes: ["simple_vertex"]
     },
 ]
