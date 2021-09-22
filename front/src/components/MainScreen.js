@@ -21,17 +21,17 @@ import CytoscapeScreen from './GraphVisualization';
 const drawerWidth = 240;
 
 const viusualScreen = {
-    width: "100%",
-    height: "73vh",
-    paddingTop: 5,
-    backgroundColor: "#fff",
-    textAlign: "left"
+  width: "100%",
+  height: "73vh",
+  paddingTop: 5,
+  backgroundColor: "#fff",
+  textAlign: "left"
 };
 
 const inputScreen = {
-    height: "5vh",
-    paddingTop: 5,
-    backgroundColor: "#fff"
+  height: "5vh",
+  paddingTop: 5,
+  backgroundColor: "#fff"
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -115,7 +115,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function MainScreen() {
   const classes = useStyles();
-  const [open, setOpen] = React.useState(true);
+  const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {
     setOpen(true);
   };
