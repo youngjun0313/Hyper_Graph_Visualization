@@ -6,6 +6,7 @@ import { sampleData } from "./sampleData";
 import popper from 'cytoscape-popper';
 
 const styleSheet = [
+  // default node style
   {
     selector: "node",
     style: {
@@ -21,24 +22,56 @@ const styleSheet = [
       "text-max-width": 50
     }
   },
+  // noun_vertex class
   {
-    selector: ".simple_vertex",
+    selector: ".noun_vertex",
     style: {
       "background-color": "data(backgroundColor)",
     }
   },
+  // predicate_vertex class
+  {
+    selector: ".predicate_vertex",
+    style: {
+      "background-color": "data(backgroundColor)",
+      color: "black"
+    }
+  },
+  // pseudo_vertex class
+  {
+    selector: ".pseudo_vertex",
+    style: {
+      "background-color": "data(backgroundColor)",
+      height: 30,
+      width: 30,
+    }
+  },
+  // default edge style
   {
     selector: "edge",
     style: {
+      width: 3,
+    }
+  },
+  // flat_edge class
+  {
+    selector: ".flat_edge",
+    style: {
       "width": 3,
+      "line-color": "#ccc",
+    }
+  },
+  // arrow_edge class
+  {
+    selector: ".arrow_edge",
+    style: {
+      width: 3,
       "curve-style": "bezier",
-      "source-arrow-shape": "triangle",
-      "source-arrow-color": "#0",
+      "line-color": "#ccc",
       "target-arrow-shape": "triangle",
       "target-arrow-color": "#0",
-      label: "EDGE"
     }
-  }
+  },
 ];
 
 Cytoscape.use(COSEBilkent);
@@ -69,27 +102,31 @@ export default function CytoscapeScreen() {
             event.target.popperRefObj = event.target.popper({
             content: () => {
               let tooltip = document.createElement("div");
+              if(event.target.data().id.indexOf("-") === -1) {
               tooltip.classList.add("popper-div");
               let table = document.createElement('table');
               tooltip.append(table);
               let targetData = event.target.data();
 
-              for (let prop in targetData) {
-                if(prop === "backgroundColor") continue;
-
-                if(!targetData.hasOwnProperty(prop)) continue;
-      
-                let targetValue = targetData[prop];
-
-                if(typeof targetValue === "object") continue;
-      
-                let tr = table.insertRow();
-      
-                let tdTitle = tr.insertCell();
-                let tdValue = tr.insertCell();
-      
-                tdTitle.innerText = prop;
-                tdValue.innerText = targetValue;
+              // if(event.target.data().id.indexOf("-") === -1) {
+                for (let prop in targetData) {
+                  if(prop === "backgroundColor") continue;
+  
+                  if(!targetData.hasOwnProperty(prop)) continue;
+        
+                  let targetValue = targetData[prop];
+                  // let targetValue = targetData.id
+  
+                  if(typeof targetValue === "object") continue;
+        
+                  let tr = table.insertRow();
+        
+                  let tdTitle = tr.insertCell();
+                  let tdValue = tr.insertCell();
+        
+                  tdTitle.innerText = prop;
+                  tdValue.innerText = targetValue;
+                }
               }
               document.body.appendChild(tooltip);
               return tooltip;
