@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -17,6 +17,7 @@ import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import { mainListItems } from './listItems';
 import SQLinput from './SQLinput';
 import CytoscapeScreen from './GraphVisualization';
+import axios from 'axios';
 
 const drawerWidth = 240;
 
@@ -122,6 +123,9 @@ export default function MainScreen() {
   const handleDrawerClose = () => {
     setOpen(false);
   };
+  useEffect(() => {
+    axios.get
+  })
 
   return (
     <div className={classes.root}>
