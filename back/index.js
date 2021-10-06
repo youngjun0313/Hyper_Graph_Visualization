@@ -73,16 +73,16 @@ app.get('/api/hyperedges', (req, res) => {
         },
         classes: ["pseudo_vertex"]
       })
-    });
 
-    edges.push({
-      data: { 
-          id: "hyperedge" + element.hyperedge_id + "->" + "pseudo_vertex" + element.hyperedge_id,
-          source: "hyperedge" + element.hyperedge_id,
-          target: "pseudo_vertex" + element.hyperedge_id
-      },
-      classes: ["arrow_edge"]
-    })
+      edges.push({
+        data: { 
+            id: "hyperedge" + element.hyperedge_id + "->" + "pseudo_vertex" + element.hyperedge_id,
+            source: "hyperedge" + element.hyperedge_id,
+            target: "pseudo_vertex" + element.hyperedge_id
+        },
+        classes: ["arrow_edge"]
+      })
+    });
 
     console.log([...hyperedges, ...pseudo_vertices, ...edges]);
     
