@@ -85,29 +85,20 @@ export default function CytoscapeScreen() {
   useEffect(() => {
     // noun vertices
     axios.get("/api/vertices").then((response) => {
-      let temp = [...vertices, ...response.data];
-      setVertices(temp);
+      var temp = [...vertices, ...response.data];
+        // hyperedges and pseudo vertices
+      axios.get("/api/hyperedges").then((response) => {
+        temp = [...temp, ...response.data];
+        setVertices(temp);
+      })
+      console.log(temp);
     });
-
-    console.log(vertices);
-
-    // hyperedges and pseudo vertices
-    // axios.get("/api/vertices").then((response) => {
-    //   let temp = [...vertices, ...response.data];
-    //   setVertices(temp);
-    // })
-
     
   }, []);
 
   return (
     <ReactCytoscape
       elements={vertices}
-      layout={{
-        name: "cose-bilkent",
-        nodeDimensionsIncludeLabels: true,
-        idealEdgeLength: 100
-      }}
       style={{ width: "100%", height: "100%" }}
       stylesheet={styleSheet}
       maxZoom = {2}
@@ -115,6 +106,12 @@ export default function CytoscapeScreen() {
       wheelSensitivity = {0.1}
       cy={
         (cy) => {
+          cy.layout({
+            name: "cose-bilkent",
+            nodeDimensionsIncludeLabels: true,
+            idealEdgeLength: 100
+          }).run();
+          
           cy.elements().bind("mouseover", (event) => {
             let tooltipId = `popper-target-${event.target.id()}`;
             let existingTarget = document.getElementById(tooltipId);
