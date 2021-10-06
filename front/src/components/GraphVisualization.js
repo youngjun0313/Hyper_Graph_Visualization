@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Cytoscape from "cytoscape";
 import ReactCytoscape from "react-cytoscapejs";
 import COSEBilkent from "cytoscape-cose-bilkent";
 import { sampleData } from "./sampleData";
 import popper from 'cytoscape-popper';
+import axios from 'axios';
 
 const styleSheet = [
   // default node style
@@ -78,9 +79,30 @@ Cytoscape.use(COSEBilkent);
 Cytoscape.use(popper);
 
 export default function CytoscapeScreen() {
+  const [vertices, setVertices] = useState([]);
+  const [edges, setEdges] = useState([]);
+
+  useEffect(() => {
+    // noun vertices
+    axios.get("/api/vertices").then((response) => {
+      let temp = [...vertices, ...response.data];
+      setVertices(temp);
+    });
+
+    console.log(vertices);
+
+    // hyperedges and pseudo vertices
+    // axios.get("/api/vertices").then((response) => {
+    //   let temp = [...vertices, ...response.data];
+    //   setVertices(temp);
+    // })
+
+    
+  }, []);
+
   return (
     <ReactCytoscape
-      elements={sampleData}
+      elements={vertices}
       layout={{
         name: "cose-bilkent",
         nodeDimensionsIncludeLabels: true,

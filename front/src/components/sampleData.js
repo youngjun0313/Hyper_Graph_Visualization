@@ -20,7 +20,7 @@ export const sampleData = [
         },
         classes: ["noun_vertex"]
     },
-    // predicate vertex의 형태
+    // predicate vertex의 형태 (hyperedge)
     {
         data: {
             id: "node3",
