@@ -24,9 +24,10 @@ app.get('/', (req, res) => {
   res.send('Root');
 });
 
+// vertices(noun vertex)
 app.get('/api/vertices', (req, res) => {
   let vertices = []
-  connection.query('SELECT * from vertex', (error, results) => {
+  connection.query('SELECT * FROM vertex', (error, results) => {
     if (error) 
       throw error;
 
@@ -47,11 +48,12 @@ app.get('/api/vertices', (req, res) => {
   });
 });
 
+// hyperedges (perdicate vertex)
 app.get('/api/hyperedges', (req, res) => {
   let hyperedges = []
   let pseudo_vertices = []
   let edges = []
-  connection.query('SELECT * from hyperedge', (error, results) => {
+  connection.query('SELECT * FROM hyperedge', (error, results) => {
     if (error) 
       throw error;
 
@@ -87,5 +89,49 @@ app.get('/api/hyperedges', (req, res) => {
     console.log([...hyperedges, ...pseudo_vertices, ...edges]);
     
     res.send([...hyperedges, ...pseudo_vertices, ...edges])
+  });
+});
+
+// edges
+app.get('/api/edges', (req, res) => {
+  let edges = []
+  connection.query('SELECT vertex_id, hyperedge_id FROM hyperedge_vertex', (error, results) => {
+    if (error) 
+      throw error;
+
+    results.forEach(element => {
+      edges.push({
+        data: { 
+            id: "vertex" + element.vertex_id + "->" + "hyperedge" + element.hyperedge_id,
+            source: "vertex" + element.vertex_id,
+            target: "hyperedge" + element.hyperedge_id
+        },
+        classes: ["flat_edge"]
+      })
+    });
+    
+    res.send(edges)
+  });
+});
+
+// pseudo_edges (pseudo vertex -> hyperedge)
+app.get('/api/pseudoEdges', (req, res) => {
+  let edges = []
+  connection.query('SELECT pseudovertex_id, hyperedge_id FROM hyperedge_pseudovertex', (error, results) => {
+    if (error) 
+      throw error;
+
+    results.forEach(element => {
+      edges.push({
+        data: { 
+            id: "pseudo_vertex" + element.pseudovertex_id + "->" + "hyperedge" + element.hyperedge_id,
+            source: "pseudo_vertex" + element.pseudovertex_id,
+            target: "hyperedge" + element.hyperedge_id
+        },
+        classes: ["flat_edge"]
+      })
+    });
+    
+    res.send(edges)
   });
 });
