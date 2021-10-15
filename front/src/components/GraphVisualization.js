@@ -2,85 +2,17 @@ import React, { useEffect, useState } from "react";
 import Cytoscape from "cytoscape";
 import ReactCytoscape from "react-cytoscapejs";
 import COSEBilkent from "cytoscape-cose-bilkent";
-import { sampleData } from "./sampleData";
+import dagre from 'cytoscape-dagre';
 import popper from 'cytoscape-popper';
 import axios from 'axios';
-
-const styleSheet = [
-  // default node style
-  {
-    selector: "node",
-    style: {
-      height: 60,
-      width: 60,
-      label: "data(label)",
-      "color": "white",
-      "background-color": "data(backgroundColor)",
-      "text-halign": "center",
-      "text-valign": "center",
-      "font-size": 8,
-      "text-wrap": "wrap",
-      "text-max-width": 50
-    }
-  },
-  // noun_vertex class
-  {
-    selector: ".noun_vertex",
-    style: {
-      "background-color": "data(backgroundColor)",
-    }
-  },
-  // predicate_vertex class
-  {
-    selector: ".predicate_vertex",
-    style: {
-      "background-color": "data(backgroundColor)",
-      color: "black"
-    }
-  },
-  // pseudo_vertex class
-  {
-    selector: ".pseudo_vertex",
-    style: {
-      "background-color": "data(backgroundColor)",
-      height: 15,
-      width: 15,
-    }
-  },
-  // default edge style
-  {
-    selector: "edge",
-    style: {
-      width: 3,
-    }
-  },
-  // flat_edge class
-  {
-    selector: ".flat_edge",
-    style: {
-      "width": 3,
-      "line-color": "#ccc",
-    }
-  },
-  // arrow_edge class
-  {
-    selector: ".arrow_edge",
-    style: {
-      width: 3,
-      "curve-style": "bezier",
-      "line-color": "#ccc",
-      "target-arrow-shape": "triangle",
-      "target-arrow-color": "#0",
-    }
-  },
-];
+import { styleSheet } from "../assets/graphStyleSheet";
 
 Cytoscape.use(COSEBilkent);
+Cytoscape.use(dagre);
 Cytoscape.use(popper);
 
-export default function CytoscapeScreen() {
-  const [vertices, setVertices] = useState([]);
-  const [edges, setEdges] = useState([]);
+export default function CytoscapeScreen({ vertices, setVertices }) {
+  // const [vertices, setVertices] = useState([]);
 
   useEffect(() => {
     // noun vertices
@@ -114,7 +46,8 @@ export default function CytoscapeScreen() {
       cy={
         (cy) => {
           cy.layout({
-            name: "cose-bilkent",
+            name: "dagre",
+            // name: "cose-bilkent",
             nodeDimensionsIncludeLabels: true,
             idealEdgeLength: 100
           }).run();
