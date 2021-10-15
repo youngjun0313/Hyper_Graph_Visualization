@@ -12,8 +12,6 @@ Cytoscape.use(dagre);
 Cytoscape.use(popper);
 
 export default function CytoscapeScreen({ vertices, setVertices }) {
-  // const [vertices, setVertices] = useState([]);
-
   useEffect(() => {
     // noun vertices
     axios.get("/api/vertices").then((response) => {
