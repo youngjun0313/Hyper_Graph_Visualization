@@ -43,8 +43,8 @@ const styleSheet = [
     selector: ".pseudo_vertex",
     style: {
       "background-color": "data(backgroundColor)",
-      height: 30,
-      width: 30,
+      height: 15,
+      width: 15,
     }
   },
   // default edge style
@@ -88,12 +88,19 @@ export default function CytoscapeScreen() {
       var temp = [...vertices, ...response.data];
         // hyperedges and pseudo vertices
       axios.get("/api/hyperedges").then((response) => {
+        // edges
         temp = [...temp, ...response.data];
-        setVertices(temp);
+        axios.get("/api/edges").then((response) => {
+          // pseudo edges (pseudo vertex -> hyperedge)
+          temp = [...temp, ...response.data];
+          axios.get("/api/pseudoEdges").then((response) => {
+            temp = [...temp, ...response.data];
+            setVertices(temp);
+          })
+        })
       })
       console.log(temp);
     });
-    
   }, []);
 
   return (
