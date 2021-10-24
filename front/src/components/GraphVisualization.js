@@ -41,7 +41,7 @@ export default function CytoscapeScreen({ vertices, setVertices }) {
       maxZoom = {2}
       minZoom = {0.5}
       wheelSensitivity = {0.1}
-      cy={
+      cy = {
         (cy) => {
           cy.layout({
             name: "dagre",
@@ -50,6 +50,7 @@ export default function CytoscapeScreen({ vertices, setVertices }) {
             idealEdgeLength: 100
           }).run();
           
+          cy.elements().unbind("mouseover");
           cy.elements().bind("mouseover", (event) => {
             let tooltipId = `popper-target-${event.target.id()}`;
             let existingTarget = document.getElementById(tooltipId);
@@ -65,7 +66,6 @@ export default function CytoscapeScreen({ vertices, setVertices }) {
               tooltip.append(table);
               let targetData = event.target.data();
 
-              // if(event.target.data().id.indexOf("-") === -1) {
                 for (let prop in targetData) {
                   if(prop === "backgroundColor") continue;
   
@@ -87,7 +87,7 @@ export default function CytoscapeScreen({ vertices, setVertices }) {
               }
               document.body.appendChild(tooltip);
               return tooltip;
-            },
+            }
           })
         })
         cy.elements().unbind("mouseout");
