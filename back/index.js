@@ -12,7 +12,7 @@ const connection = new mysql({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'hypergraph_prev',
+  database: 'hypergraph_orm',
   ssl: true
 });
 
@@ -40,7 +40,7 @@ app.get('/api/vertices', (req, res) => {
   results.forEach(element => {
     vertices.push( {
       data: { 
-        id: "vertex" + element.vertex_id,
+        id: "vertex" + element.id,
         label: element.noun_phrase,
         backgroundColor: simpleVertexColor,
       },
@@ -61,7 +61,7 @@ app.get('/api/hyperedges', (req, res) => {
   results.forEach(element => {
     hyperedges.push({
       data: { 
-        id: "hyperedge" + element.hyperedge_id,
+        id: "hyperedge" + element.id,
         label: element.predicate_phrase,
         backgroundColor: predicateColor
       },
@@ -70,7 +70,7 @@ app.get('/api/hyperedges', (req, res) => {
 
     pseudo_vertices.push({
       data: {
-        id: "pseudo_vertex" + element.hyperedge_id,
+        id: "pseudo_vertex" + element.id,
         label: "",
         backgroundColor: pseudoVertexColor
       },
@@ -79,9 +79,9 @@ app.get('/api/hyperedges', (req, res) => {
 
     edges.push({
       data: { 
-          id: "hyperedge" + element.hyperedge_id + "->" + "pseudo_vertex" + element.hyperedge_id,
-          source: "hyperedge" + element.hyperedge_id,
-          target: "pseudo_vertex" + element.hyperedge_id
+          id: "hyperedge" + element.id + "->" + "pseudo_vertex" + element.id,
+          source: "hyperedge" + element.id,
+          target: "pseudo_vertex" + element.id
       },
       classes: ["arrow_edge"]
     })
@@ -151,8 +151,7 @@ const find_nodes_from_hyperedge = (root_vertex, left_hop, complete_graph, node_l
   // 기준이 되는 node 설정
   const results = connection.query(`SELECT * FROM hyperedge WHERE predicate_phrase = "${root_vertex}"`);
 
-
-  const selectedHyperedge = results[0].hyperedge_id;
+  const selectedHyperedge = results[0].id;
 
   // 먼저 hyperedge -> pseudoVertex 완성
   complete_graph.push({
@@ -163,31 +162,30 @@ const find_nodes_from_hyperedge = (root_vertex, left_hop, complete_graph, node_l
     },
     classes: ["predicate_vertex"]
   })
-  node_list.push("hyperedge" + results[0].hyperedge_id);
+  node_list.push("hyperedge" + results[0].id);
 
   complete_graph.push({
     data: {
-      id: "pseudo_vertex" + results[0].hyperedge_id,
+      id: "pseudo_vertex" + results[0].id,
       label: "",
       backgroundColor: pseudoVertexColor
     },
     classes: ["pseudo_vertex"]
   })
-  node_list.push("pseudo_vertex" + results[0].hyperedge_id);
+  node_list.push("pseudo_vertex" + results[0].id);
 
   complete_graph.push({
     data: { 
-        id: "hyperedge" + results[0].hyperedge_id + "->" + "pseudo_vertex" + results[0].hyperedge_id,
-        source: "hyperedge" + results[0].hyperedge_id,
-        target: "pseudo_vertex" + results[0].hyperedge_id
+        id: "hyperedge" + results[0].id + "->" + "pseudo_vertex" + results[0].id,
+        source: "hyperedge" + results[0].id,
+        target: "pseudo_vertex" + results[0].id
     },
     classes: ["arrow_edge"]
   })
-  node_list.push("hyperedge" + results[0].hyperedge_id + "->" + "pseudo_vertex" + results[0].hyperedge_id);
-
+  node_list.push("hyperedge" + results[0].id + "->" + "pseudo_vertex" + results[0].id);
 
   // hyperedge(predicate vertex)와 연결된 다른 pseudo vertex 찾기 incoming direction
-  const results2 = connection.query(`SELECT * FROM hyperedge_pseudovertex NATURAL JOIN hyperedge WHERE hyperedge_id = "${selectedHyperedge}"`);
+  const results2 = connection.query(`SELECT * FROM hyperedge_pseudovertex NATURAL JOIN hyperedge WHERE hyperedge_id = "${selectedHyperedge}" AND hyperedge_id = id`);
 
   results2.forEach((element) => {
     if(node_list.indexOf(element.pseudovertex_id) === -1) {
@@ -202,40 +200,40 @@ const find_nodes_from_hyperedge = (root_vertex, left_hop, complete_graph, node_l
       })
       node_list.push("pseudo_vertex" + element.pseudovertex_id + "->" + "hyperedge" + element.hyperedge_id);
 
-      const results3 = connection.query(`SELECT * FROM hyperedge WHERE hyperedge_id = "${element.pseudovertex_id}"`);
+      const results3 = connection.query(`SELECT * FROM hyperedge WHERE id = "${element.pseudovertex_id}"`);
 
       // pseudo vertex와 hyperedge 합치기
       results3.forEach((element) => {
         // 해당 pseudo vertex와 hyperedge 추가
         complete_graph.push({
           data: { 
-            id: "hyperedge" + element.hyperedge_id,
+            id: "hyperedge" + element.id,
             label: element.predicate_phrase,
             backgroundColor: predicateColor
           },
           classes: ["predicate_vertex"]
         })
-        node_list.push("hyperedge" + element.hyperedge_id);
+        node_list.push("hyperedge" + element.id);
       
         complete_graph.push({
           data: {
-            id: "pseudo_vertex" + element.hyperedge_id,
+            id: "pseudo_vertex" + element.id,
             label: "",
             backgroundColor: pseudoVertexColor
           },
           classes: ["pseudo_vertex"]
         })
-        node_list.push("pseudo_vertex" + element.hyperedge_id);
+        node_list.push("pseudo_vertex" + element.id);
       
         complete_graph.push({
           data: { 
-              id: "hyperedge" + element.hyperedge_id + "->" + "pseudo_vertex" + element.hyperedge_id,
-              source: "hyperedge" + element.hyperedge_id,
-              target: "pseudo_vertex" + element.hyperedge_id
+              id: "hyperedge" + element.id + "->" + "pseudo_vertex" + element.id,
+              source: "hyperedge" + element.id,
+              target: "pseudo_vertex" + element.id
           },
           classes: ["arrow_edge"]
         })
-        node_list.push("hyperedge" + element.hyperedge_id + "->" + "pseudo_vertex" + element.hyperedge_id);
+        node_list.push("hyperedge" + element.id + "->" + "pseudo_vertex" + element.id);
 
         complete_graph.concat(find_nodes_from_hyperedge(element.predicate_phrase, left_hop-1, complete_graph, node_list));
         // 중복제거
@@ -245,7 +243,7 @@ const find_nodes_from_hyperedge = (root_vertex, left_hop, complete_graph, node_l
   });
 
   // hyperedge(predicate vertex)와 연결된 다른 pseudo vertex 찾기 outgoing direction direction
-  const results4 = connection.query(`SELECT * FROM hyperedge_pseudovertex NATURAL JOIN hyperedge WHERE pseudovertex_id = "${selectedHyperedge}"`);
+  const results4 = connection.query(`SELECT * FROM hyperedge_pseudovertex NATURAL JOIN hyperedge WHERE pseudovertex_id = "${selectedHyperedge}" AND id = hyperedge_id`);
 
   results4.forEach((element) => {
     if(node_list.indexOf(element.pseudovertex_id) === -1) {
@@ -297,7 +295,7 @@ const find_nodes_from_hyperedge = (root_vertex, left_hop, complete_graph, node_l
   });
 
   // selected hyperedged와 연결된 noun vertex 고르기
-  const results5 = connection.query(`SELECT * FROM hyperedge_vertex NATURAL JOIN vertex WHERE hyperedge_id = "${selectedHyperedge}"`);
+  const results5 = connection.query(`SELECT * FROM hyperedge_vertex NATURAL JOIN vertex WHERE hyperedge_id = "${selectedHyperedge}" AND vertex_id = id`);
     
   results5.forEach(element => {
     if(node_list.indexOf(element.vertex_id) === -1) {
@@ -336,10 +334,10 @@ const find_nodes_from_vertex = (root_vertex, left_hop, complete_graph, node_list
   // 기준이 되는 node 설정
   const results = connection.query(`SELECT * FROM vertex WHERE noun_phrase = "${root_vertex}"`);
 
-  const selectedvertex = results[0].vertex_id;
+  const selectedvertex = results[0].id;
 
   // vertex와 연결된 다른 pseudo vertex 찾기
-  const results2 = connection.query(`SELECT * FROM hyperedge_vertex NATURAL JOIN hyperedge WHERE vertex_id = "${selectedvertex}"`);
+  const results2 = connection.query(`SELECT * FROM hyperedge_vertex NATURAL JOIN hyperedge WHERE vertex_id = "${selectedvertex}" AND id = hyperedge_id`);
 
   complete_graph.push({
     data: { 
