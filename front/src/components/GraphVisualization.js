@@ -39,13 +39,14 @@ export default function CytoscapeScreen({ vertices, setVertices }) {
       style={{ width: "100%", height: "100%" }}
       stylesheet={styleSheet}
       maxZoom = {2}
-      minZoom = {0.5}
+      minZoom = {0.1}
       wheelSensitivity = {0.1}
       cy = {
         (cy) => {
           cy.layout({
-            name: "dagre",
-            // name: "cose-bilkent",
+            // name: "dagre",
+            name: "cose-bilkent",
+            // name: "elk",
             nodeDimensionsIncludeLabels: true,
             idealEdgeLength: 100
           }).run();
