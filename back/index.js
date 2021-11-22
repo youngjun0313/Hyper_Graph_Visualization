@@ -13,6 +13,7 @@ const connection = new mysql({
   user: 'root',
   password: '',
   database: 'hypergraph_orm',
+  // database: 'test',
   ssl: true
 });
 
