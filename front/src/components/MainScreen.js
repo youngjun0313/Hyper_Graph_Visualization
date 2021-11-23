@@ -21,7 +21,10 @@ import { useStyles, viusualScreen, inputScreen } from '../assets/mainScreenStyle
 export default function MainScreen() {
   const classes = useStyles();
   const [open, setOpen] = useState(false);
+  // 실제 화면에 보이는 graph
   const [vertices, setVertices] = useState([]);
+  // 전체 그래프를 저장하기 위한 graph
+  const [completeGraph, setCompleteGraph] = useState([]);
   
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -72,14 +75,14 @@ export default function MainScreen() {
                 <Grid item xs={12}>
                     <Paper className={classes.paper}>
                         <div style = {viusualScreen}>
-                            <CytoscapeScreen vertices={vertices} setVertices={setVertices}/>
+                            <CytoscapeScreen vertices={vertices} setVertices={setVertices} completeGraph={completeGraph} setCompleteGraph={setCompleteGraph}/>
                         </div>
                     </Paper>
                 </Grid>
                 <Grid item xs={12}>
                     <Paper className={classes.paper}>
                         <div style = {inputScreen}>
-                            <SQLinput vertices={vertices} setVertices={setVertices}/>
+                            <SQLinput setVertices={setVertices} completeGraph={completeGraph}/>
                         </div>
                     </Paper>
                 </Grid>

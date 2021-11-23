@@ -3,9 +3,9 @@ import Title from './Title';
 import { Input } from '@material-ui/core';
 import axios from 'axios';
 
-export default function SQLinput({ vertices, setVertices }) {
+export default function SQLinput({ completeGraph, setVertices }) {
   const [input, setInput] = useState("");
-  const options = ["-V", "-h", "-HE"];
+  const options = ["-V", "-h", "-HE", "-income", "-PV"];
 
   const onChange = (e) => {
     setInput(e.target.value);
@@ -91,6 +91,11 @@ export default function SQLinput({ vertices, setVertices }) {
               request.hyperedge = parsing[i+1];
             }
           }
+          // -income 옵션의 경우
+          else if(options.indexOf(parsing[i]) === 3)
+            request.income = true;
+          else if(options.indexOf(parsing[i]) === 4)
+            request.pseudovertex = parsing[i+1];
         }
         
         // 서버에 요청
@@ -117,4 +122,8 @@ export default function SQLinput({ vertices, setVertices }) {
       </Title>
     </>
   );
+}
+
+const processIncome = () => {
+
 }

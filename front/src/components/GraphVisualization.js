@@ -2,16 +2,14 @@ import React, { useEffect, useState } from "react";
 import Cytoscape from "cytoscape";
 import ReactCytoscape from "react-cytoscapejs";
 import COSEBilkent from "cytoscape-cose-bilkent";
-import dagre from 'cytoscape-dagre';
 import popper from 'cytoscape-popper';
 import axios from 'axios';
 import { styleSheet } from "../assets/graphStyleSheet";
 
 Cytoscape.use(COSEBilkent);
-Cytoscape.use(dagre);
 Cytoscape.use(popper);
 
-export default function CytoscapeScreen({ vertices, setVertices }) {
+export default function CytoscapeScreen({ vertices, setVertices, setCompleteGraph }) {
   useEffect(() => {
     // noun vertices
     axios.get("/api/vertices").then((response) => {
@@ -26,10 +24,10 @@ export default function CytoscapeScreen({ vertices, setVertices }) {
           axios.get("/api/pseudoEdges").then((response) => {
             temp = [...temp, ...response.data];
             setVertices(temp);
+            setCompleteGraph(temp);
           })
         })
       })
-      console.log(temp);
     });
   }, []);
 
@@ -39,14 +37,12 @@ export default function CytoscapeScreen({ vertices, setVertices }) {
       style={{ width: "100%", height: "100%" }}
       stylesheet={styleSheet}
       maxZoom = {2}
-      minZoom = {0.1}
+      minZoom = {0.05}
       wheelSensitivity = {0.1}
       cy = {
         (cy) => {
           cy.layout({
-            // name: "dagre",
             name: "cose-bilkent",
-            // name: "elk",
             nodeDimensionsIncludeLabels: true,
             idealEdgeLength: 100
           }).run();
