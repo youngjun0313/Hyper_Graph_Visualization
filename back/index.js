@@ -1,12 +1,5 @@
 const express = require('express');
 const mysql = require('sync-mysql');
-// const connection = mysql.createConnection({
-//     host: 'localhost',
-//     user: 'root',
-//     password: '',
-//     database: 'hypergraph_prev',
-//     ssl: true
-// });
 
 const connection = new mysql({
   host: 'localhost',
@@ -27,7 +20,7 @@ app.set('port', 7777);
 
 app.listen(app.get('port'), () => {
     console.log('Express server listening on port ' + app.get('port'));
-  });
+});
 
 app.get('/', (req, res) => {
   res.send('Root');
@@ -135,19 +128,26 @@ app.get('/api/sqlInput', (req, res) => {
 
   let graph = []
 
-  if(typeof request.vertex === "undefined" && request.hyperedge !== null) {
-    graph = find_nodes_from_hyperedge(request.hyperedge, request.hop, [], []);
-  } else if(typeof request.hyperedge === "undefined" && request.vertex !== null) {
-    graph = find_nodes_from_vertex(request.vertex, request.hop, [], []);
+  // income 연산의 경우 pseudovertex_id가 주어졌음
+  if(request.income) {
+    graph = income_nodes_from_hyperedge(request.pseudovertex, [], []);
+  }
+  // hop 연산의 경우 
+  else {
+    if(typeof request.vertex === "undefined" && request.hyperedge !== null) {
+      graph = find_nodes_from_hyperedge(request.hyperedge, request.hop, [], []);
+    } else if(typeof request.hyperedge === "undefined" && request.vertex !== null) {
+      graph = find_nodes_from_vertex(request.vertex, request.hop, [], []);
+    }
   }
 
   res.send(graph);
 });
 
+// root vertex가 pseudo vertex인 경우
 const find_nodes_from_hyperedge = (root_vertex, left_hop, complete_graph, node_list) => {
   if(left_hop <= 0)
     return complete_graph;
-  // root vertex가 pseudo vertex인 경우
   
   // 기준이 되는 node 설정
   const results = connection.query(`SELECT * FROM hyperedge WHERE predicate_phrase = "${root_vertex}"`);
@@ -398,6 +398,132 @@ const find_nodes_from_vertex = (root_vertex, left_hop, complete_graph, node_list
   
       complete_graph.concat(find_nodes_from_hyperedge(element.predicate_phrase, left_hop-1, complete_graph, node_list));
       complete_graph.filter((item, pos) => complete_graph.indexOf(item) === pos);
+    }
+  });
+
+  return complete_graph;
+}
+
+const income_nodes_from_hyperedge = (hyperedge_id, complete_graph, node_list) => {
+  // 해당 pseudo vertex와 hyperedge 추가
+  const result0 = connection.query(`SELECT * FROM hyperedge WHERE id = "${hyperedge_id}"`);
+
+  complete_graph.push({
+    data: { 
+      id: "hyperedge" + hyperedge_id,
+      label: result0[0].predicate_phrase,
+      backgroundColor: predicateColor
+    },
+    classes: ["predicate_vertex"]
+  })
+  node_list.push("hyperedge" + hyperedge_id);
+
+  complete_graph.push({
+    data: {
+      id: "pseudo_vertex" + hyperedge_id,
+      label: "",
+      backgroundColor: pseudoVertexColor
+    },
+    classes: ["pseudo_vertex"]
+  })
+  node_list.push("pseudo_vertex" + hyperedge_id);
+
+  complete_graph.push({
+    data: { 
+        id: "hyperedge" + hyperedge_id + "->" + "pseudo_vertex" + hyperedge_id,
+        source: "hyperedge" + hyperedge_id,
+        target: "pseudo_vertex" + hyperedge_id
+    },
+    classes: ["arrow_edge"]
+  })
+  node_list.push("hyperedge" + hyperedge_id + "->" + "pseudo_vertex" + hyperedge_id);
+
+
+  // hyperedge로 들어오는 noun vertex부터 처리하기
+  const results1 = connection.query(` SELECT *
+                                      FROM hyperedge_vertex NATURAL JOIN vertex
+                                      WHERE vertex_id = id AND hyperedge_id = "${hyperedge_id}"`);
+
+  results1.forEach((element) => {
+    // 이미 node가 포함된지 안된지 중복 확인을 한다.
+    if(node_list.indexOf(element.vertex_id) === -1) {
+      complete_graph.push({
+        data: {
+            id: "vertex" + element.vertex_id + "->" + "hyperedge" + hyperedge_id,
+            source: "vertex" + element.vertex_id,
+            target: "hyperedge" + hyperedge_id
+        },
+        classes: ["flat_edge"]
+      })
+      node_list.push("vertex" + element.vertex_id + "->" + "hyperedge" + hyperedge_id);
+
+      complete_graph.push({
+        data: {
+            id: "vertex" + element.vertex_id,
+            label: element.noun_phrase,
+            backgroundColor: simpleVertexColor
+        },
+        classes: ["noun_vertex"]
+      })
+      node_list.push("vertex" + element.vertex_id);
+    }
+  })
+
+  // hyperedge로 들어오는 pseudovertex 처리 by recursion
+  const results2 = connection.query(`SELECT * FROM hyperedge_pseudovertex NATURAL JOIN hyperedge WHERE hyperedge_id = "${hyperedge_id}" AND hyperedge_id = id`);
+
+  results2.forEach((element) => {
+    if(node_list.indexOf(element.pseudovertex_id) === -1) {
+      // selected hyperedge와 연결된 pseudo vertex들 합치기
+      complete_graph.push({
+        data: { 
+            id: "pseudo_vertex" + element.pseudovertex_id + "->" + "hyperedge" + element.hyperedge_id,
+            source: "pseudo_vertex" + element.pseudovertex_id,
+            target: "hyperedge" + element.hyperedge_id
+        },
+        classes: ["flat_edge"]
+      })
+      node_list.push("pseudo_vertex" + element.pseudovertex_id + "->" + "hyperedge" + element.hyperedge_id);
+
+      const results3 = connection.query(`SELECT * FROM hyperedge WHERE id = "${element.pseudovertex_id}"`);
+
+      // pseudo vertex와 hyperedge 합치기
+      results3.forEach((element) => {
+        // 해당 pseudo vertex와 hyperedge 추가
+        complete_graph.push({
+          data: { 
+            id: "hyperedge" + element.id,
+            label: element.predicate_phrase,
+            backgroundColor: predicateColor
+          },
+          classes: ["predicate_vertex"]
+        })
+        node_list.push("hyperedge" + element.id);
+      
+        complete_graph.push({
+          data: {
+            id: "pseudo_vertex" + element.id,
+            label: "",
+            backgroundColor: pseudoVertexColor
+          },
+          classes: ["pseudo_vertex"]
+        })
+        node_list.push("pseudo_vertex" + element.id);
+      
+        complete_graph.push({
+          data: { 
+              id: "hyperedge" + element.id + "->" + "pseudo_vertex" + element.id,
+              source: "hyperedge" + element.id,
+              target: "pseudo_vertex" + element.id
+          },
+          classes: ["arrow_edge"]
+        })
+        node_list.push("hyperedge" + element.id + "->" + "pseudo_vertex" + element.id);
+
+        complete_graph.concat(income_nodes_from_hyperedge(element.id, complete_graph, node_list));
+        // 중복제거
+        complete_graph.filter((item, pos) => complete_graph.indexOf(item) === pos);
+      });
     }
   });
 
